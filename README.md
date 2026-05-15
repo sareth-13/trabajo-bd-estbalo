@@ -1,2 +1,3 @@
-##Final - Base de Datos
-##Participantes
+Final - Base de Datos
+
+Participantes
