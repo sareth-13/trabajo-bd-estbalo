@@ -1,7 +1,9 @@
 Final - Base de Datos
 
-Participantes
+Participantes:
 
-Joaquin Ojeda Villafuerte 
+-Joaquin Ojeda Villafuerte 
 
-Luis Sayra Ambilla
+-Luis Sayra Ambilla
+
+-Sareth Marquez Espinoza
