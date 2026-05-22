@@ -55,3 +55,11 @@ VALUES
 (3, 3, 3, '2026-05-05', 20, 400.00, 'FAC-1003'),
 (4, 4, 4, '2026-05-07', 15, 900.00, 'FAC-1004'),
 (5, 5, 5, '2026-05-10', 40, 1200.00, 'FAC-1005');
+
+INSERT INTO PROVEEDOR (id_proveedor,nombre,ruc,telefono,direccion)
+VALUES
+(1, 'Lácteos del Valle SAC', '20111222333', '987111222', 'Av. Ganadera 123'),
+(2, 'Distribuidora Andina', '20123456789', '987654321', 'Av. Perú 123'),
+(3, 'Comercial Lima SAC', '20456789123', '986123456', 'Jr. Arequipa 456'),
+(4, 'Insumos del Norte', '20567891234', '985741236', 'Calle Los Olivos 789'),
+(5, 'Global Market', '20789123456', '983369258', 'Jr. Unión 654');
