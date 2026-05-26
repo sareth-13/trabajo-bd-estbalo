@@ -39,7 +39,7 @@ CREATE TABLE CORRAL (
     id_corral INT PRIMARY KEY AUTO_INCREMENT,
     nombre VARCHAR(50) NOT NULL,
     capacidad INT,
-    descripción TEXT
+    descripcion TEXT
 );
 
 CREATE TABLE VACA(
