@@ -51,3 +51,49 @@ ALTER TABLE PAGO_EMPLEADO
     ADD CONSTRAINT chk_dias_trabajados CHECK (dias_trabajados BETWEEN 0 AND 31),
     ADD CONSTRAINT chk_monto_pago      CHECK (monto_total > 0),
     ADD CONSTRAINT chk_bonos           CHECK (bonos >= 0);
+
+ALTER TABLE EVENTO_SANITARIO
+    MODIFY tipo_evento VARCHAR(100) NOT NULL,
+    ADD CONSTRAINT chk_costo_evento CHECK (costo >= 0);
+
+ALTER TABLE USUARIO
+    DROP FOREIGN KEY usuario_ibfk_1,
+    ADD CONSTRAINT fk_usuario_empleado
+        FOREIGN KEY (id_empleado) REFERENCES EMPLEADO(id_empleado)
+        ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE USUARIO_ROL
+    DROP FOREIGN KEY usuario_rol_ibfk_1,
+    ADD CONSTRAINT fk_usuariorol_usuario
+        FOREIGN KEY (id_usuario) REFERENCES USUARIO(id_usuario)
+        ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE USUARIO_ROL
+    DROP FOREIGN KEY usuario_rol_ibfk_2,
+    ADD CONSTRAINT fk_usuariorol_rol
+        FOREIGN KEY (id_rol) REFERENCES ROL(id_rol)
+        ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE HISTORIAL_CORRAL
+    DROP FOREIGN KEY historial_corral_ibfk_1,
+    ADD CONSTRAINT fk_historial_vaca
+        FOREIGN KEY (id_vaca) REFERENCES VACA(id_vaca)
+        ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE HISTORIAL_CORRAL
+    DROP FOREIGN KEY historial_corral_ibfk_2,
+    ADD CONSTRAINT fk_historial_corral
+        FOREIGN KEY (id_corral) REFERENCES CORRAL(id_corral)
+        ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE PRODUCCION_LECHE
+    DROP FOREIGN KEY produccion_leche_ibfk_1,
+    ADD CONSTRAINT fk_produccion_vaca
+        FOREIGN KEY (id_vaca) REFERENCES VACA(id_vaca)
+        ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE PRODUCCION_LECHE
+    DROP FOREIGN KEY produccion_leche_ibfk_2,
+    ADD CONSTRAINT fk_produccion_lote
+        FOREIGN KEY (id_lote_prdccion) REFERENCES LOTE_PRODUCCION(id_lote)
+        ON DELETE CASCADE ON UPDATE CASCADE;
