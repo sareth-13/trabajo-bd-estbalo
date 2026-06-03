@@ -1,0 +1,31 @@
+USE establo;
+ 
+SELECT
+    v.id_vaca,
+    v.arete                                          AS codigo_vaca,
+    DATE_FORMAT(p.fcha, '%Y-%m')                     AS mes,
+    COUNT(p.id_prdccion)                             AS registros_ordeño,
+    ROUND(SUM(p.litros), 2)                          AS total_litros,
+    ROUND(AVG(p.litros), 2)                          AS promedio_litros_por_ordeño,
+    ROUND(AVG(p.grasa_prcntaje), 2)                  AS promedio_grasa_pct
+FROM PRODUCCION_LECHE p
+JOIN VACA v ON v.id_vaca = p.id_vaca
+GROUP BY v.id_vaca, v.arete, DATE_FORMAT(p.fcha, '%Y-%m')
+HAVING SUM(p.litros) > 20
+ORDER BY mes DESC, total_litros DESC;
+ 
+ 
+SELECT
+    l.id_lote,
+    l.nombre_lote,
+    l.fecha_inicio,
+    l.fecha_fin,
+    COUNT(vl.id_venta)                               AS numero_ventas,
+    ROUND(SUM(vl.litros_vendidos), 2)                AS total_litros_vendidos,
+    ROUND(AVG(vl.precio_por_litro), 2)               AS precio_promedio_litro,
+    ROUND(SUM(vl.total_venta), 2)                    AS ingreso_total
+FROM VENTA_LECHE vl
+JOIN LOTE_PRODUCCION l ON l.id_lote = vl.id_lote_prdccion
+GROUP BY l.id_lote, l.nombre_lote, l.fecha_inicio, l.fecha_fin
+HAVING SUM(vl.total_venta) > 800
+ORDER BY ingreso_total DESC;
