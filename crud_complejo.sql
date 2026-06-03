@@ -58,3 +58,78 @@ BEGIN
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'Stock insuficiente para el insumo seleccionado';
     END IF;
+CREATE PROCEDURE registrar_compra_insumo_y_actualizar_stock(
+    IN p_id_insumo    INT,
+    IN p_id_proveedor INT,
+    IN p_fecha_compra DATE,
+    IN p_cantidad     DECIMAL(10,2),
+    IN p_costo_total  DECIMAL(10,2),
+    IN p_factura      VARCHAR(50)
+)
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM PROVEEDOR WHERE id_proveedor = p_id_proveedor) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'El proveedor no existe';
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM INSUMO WHERE id_insumo = p_id_insumo) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'El insumo no existe';
+    END IF;
+
+    INSERT INTO COMPRA_INSUMO
+        (id_insumo, id_proveedor, fecha_compra, cantidad, costo_total, factura_numero)
+    VALUES
+        (p_id_insumo, p_id_proveedor, p_fecha_compra, p_cantidad, p_costo_total, p_factura);
+
+    UPDATE INSUMO
+    SET    stock_actual = stock_actual + p_cantidad
+    WHERE  id_insumo    = p_id_insumo;
+
+    SELECT 'Compra registrada y stock actualizado correctamente' AS resultado;
+END$$
+
+
+CREATE PROCEDURE trasladar_vaca_de_corral(
+    IN p_id_vaca         INT,
+    IN p_id_corral_nuevo INT,
+    IN p_fecha           DATE,
+    IN p_motivo          VARCHAR(225),
+    IN p_nuevo_estado    VARCHAR(50)
+)
+BEGIN
+    DECLARE v_capacidad INT;
+    DECLARE v_ocupacion INT;
+
+    SELECT capacidad INTO v_capacidad
+    FROM   CORRAL WHERE id_corral = p_id_corral_nuevo;
+
+    SELECT COUNT(*) INTO v_ocupacion
+    FROM   HISTORIAL_CORRAL
+    WHERE  id_corral  = p_id_corral_nuevo
+      AND  fcha_slida IS NULL;
+
+    IF v_ocupacion >= v_capacidad THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'El corral destino no tiene capacidad disponible';
+    END IF;
+
+    UPDATE HISTORIAL_CORRAL
+    SET    fcha_slida = p_fecha
+    WHERE  id_vaca    = p_id_vaca
+      AND  fcha_slida IS NULL;
+
+    INSERT INTO HISTORIAL_CORRAL
+        (id_vaca, id_corral, fcha_entrda, fcha_slida, motivo)
+    VALUES
+        (p_id_vaca, p_id_corral_nuevo, p_fecha, NULL, p_motivo);
+
+    IF p_nuevo_estado IS NOT NULL THEN
+        UPDATE VACA
+        SET    estado = p_nuevo_estado
+        WHERE  id_vaca = p_id_vaca;
+    END IF;
+
+    SELECT 'Traslado registrado correctamente' AS resultado;
+END$$
+
