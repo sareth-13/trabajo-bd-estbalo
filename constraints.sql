@@ -97,3 +97,33 @@ ALTER TABLE PRODUCCION_LECHE
     ADD CONSTRAINT fk_produccion_lote
         FOREIGN KEY (id_lote_prdccion) REFERENCES LOTE_PRODUCCION(id_lote)
         ON DELETE CASCADE ON UPDATE CASCADE;
+
+CREATE PROCEDURE registrar_venta_leche_en_cascada(
+    IN p_id_lote          INT,
+    IN p_fecha            DATE,
+    IN p_litros_vendidos  DECIMAL(8,2),
+    IN p_precio_por_litro DECIMAL(6,2),
+    IN p_nombre_cliente   VARCHAR(150)
+)
+BEGIN
+    DECLARE v_total DECIMAL(10,2);
+
+    IF NOT EXISTS (
+        SELECT 1 FROM LOTE_PRODUCCION
+        WHERE id_lote = p_id_lote AND fecha_fin IS NOT NULL
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'El lote no existe o aún está abierto';
+    END IF;
+
+    SET v_total = p_litros_vendidos * p_precio_por_litro;
+
+    INSERT INTO VENTA_LECHE
+        (id_lote_prdccion, fcha, litros_vendidos, precio_por_litro, total_venta, comprador)
+    VALUES
+        (p_id_lote, p_fecha, p_litros_vendidos, p_precio_por_litro, v_total, p_nombre_cliente);
+
+    SELECT CONCAT('Venta registrada. Total: S/ ', v_total) AS resultado;
+END$$
+
+DELIMITER ; 
