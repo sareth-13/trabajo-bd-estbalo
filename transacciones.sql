@@ -27,3 +27,25 @@ BEGIN
             SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = 'El corral destino no tiene capacidad disponible';
         END IF;
+UPDATE HISTORIAL_CORRAL
+        SET    fcha_slida = p_fecha
+        WHERE  id_vaca    = p_id_vaca
+          AND  fcha_slida IS NULL;
+
+        -- Registrar entrada al nuevo corral
+        INSERT INTO HISTORIAL_CORRAL
+            (id_vaca, id_corral, fcha_entrda, fcha_slida, motivo)
+        VALUES
+            (p_id_vaca, p_id_corral_nuevo, p_fecha, NULL, p_motivo);
+
+        -- Actualizar estado de la vaca si se indica
+        IF p_nuevo_estado IS NOT NULL THEN
+            UPDATE VACA
+            SET    estado = p_nuevo_estado
+            WHERE  id_vaca = p_id_vaca;
+        END IF;
+
+    COMMIT;
+
+    SELECT 'Traslado completado exitosamente' AS resultado;
+END$$
