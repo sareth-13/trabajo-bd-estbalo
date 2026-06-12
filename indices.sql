@@ -4,3 +4,21 @@ EXPLAIN SELECT * FROM PRODUCCION_LECHE WHERE fcha BETWEEN '2024-01-01' AND '2024
 EXPLAIN SELECT * FROM EVENTO_SANITARIO WHERE id_vaca = 1;
 EXPLAIN SELECT * FROM COMPRA_INSUMO WHERE id_proveedor = 1;
 EXPLAIN SELECT * FROM HISTORIAL_CORRAL WHERE id_vaca = 1 AND fcha_slida IS NULL;
+
+CREATE INDEX idx_produccion_vaca
+    ON PRODUCCION_LECHE (id_vaca);
+
+CREATE INDEX idx_produccion_fecha
+    ON PRODUCCION_LECHE (fcha);
+
+CREATE INDEX idx_produccion_vaca_fecha
+    ON PRODUCCION_LECHE (id_vaca, fcha);
+
+CREATE INDEX idx_evento_vaca
+    ON EVENTO_SANITARIO (id_vaca);
+
+CREATE INDEX idx_compra_proveedor
+    ON COMPRA_INSUMO (id_proveedor);
+
+CREATE INDEX idx_historial_vaca_salida
+    ON HISTORIAL_CORRAL (id_vaca, fcha_slida);
