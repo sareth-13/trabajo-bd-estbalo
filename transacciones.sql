@@ -49,3 +49,46 @@ UPDATE HISTORIAL_CORRAL
 
     SELECT 'Traslado completado exitosamente' AS resultado;
 END$$
+
+CREATE PROCEDURE venta_leche_transaccion(
+    IN p_id_lote          INT,
+    IN p_fecha            DATE,
+    IN p_litros_vendidos  DECIMAL(8,2),
+    IN p_precio_por_litro DECIMAL(6,2),
+    IN p_comprador        VARCHAR(100)
+)
+BEGIN
+    DECLARE v_total DECIMAL(10,2);
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Error en la venta: transacción revertida';
+    END;
+
+    START TRANSACTION;
+
+        IF NOT EXISTS (
+            SELECT 1 FROM LOTE_PRODUCCION
+            WHERE  id_lote  = p_id_lote
+              AND  fecha_fin IS NOT NULL
+        ) THEN
+            SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = 'El lote no existe o aún está abierto';
+        END IF;
+
+        SET v_total = p_litros_vendidos * p_precio_por_litro;
+
+        INSERT INTO VENTA_LECHE
+            (id_lote_prdccion, fcha, litros_vendidos,
+             precio_por_litro, total_venta, comprador)
+        VALUES
+            (p_id_lote, p_fecha, p_litros_vendidos,
+             p_precio_por_litro, v_total, p_comprador);
+
+    COMMIT;
+
+    SELECT CONCAT('Venta registrada. Total: S/ ', v_total) AS resultado;
+END$$
+
+DELIMITER ;
