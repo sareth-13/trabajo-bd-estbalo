@@ -9,15 +9,19 @@ VALUES ('Juan', 'Pérez', 'Administrador', '2023-01-15', 2500.00, '987654321', 1
 
 SELECT * FROM EMPLEADO;
 
+-- actualizar último empleado insertado (más seguro que id fijo)
 UPDATE EMPLEADO
 SET salario_base = 2800.00
-WHERE id_empleado = 1;
+ORDER BY id_empleado DESC
+LIMIT 1;
 
--- DELETE SEGURO (BORRAR DEPENDENCIAS PRIMERO)
-DELETE FROM ASISTENCIA WHERE id_empleado = 1;
-DELETE FROM PAGO_EMPLEADO WHERE id_empleado = 1;
-DELETE FROM USUARIO WHERE id_empleado = 1;
-DELETE FROM EMPLEADO WHERE id_empleado = 1;
+-- DELETE SEGURO EMPLEADO
+SET @emp_id = (SELECT MAX(id_empleado) FROM EMPLEADO);
+
+DELETE FROM ASISTENCIA WHERE id_empleado = @emp_id;
+DELETE FROM PAGO_EMPLEADO WHERE id_empleado = @emp_id;
+DELETE FROM USUARIO WHERE id_empleado = @emp_id;
+DELETE FROM EMPLEADO WHERE id_empleado = @emp_id;
 
 -- =========================
 -- CRUD VACA (SEGURO)
@@ -28,18 +32,21 @@ VALUES ('A001', '2020-03-10', 'Activa', '2021-01-05');
 
 SELECT * FROM VACA;
 
--- 1. quitar relación de madre primero
+-- obtener última vaca creada
+SET @vaca_id = (SELECT MAX(id_vaca) FROM VACA);
+
+-- romper relación madre
 UPDATE VACA
 SET id_madre = NULL
-WHERE id_madre = 1;
+WHERE id_madre = @vaca_id;
 
--- 2. borrar dependencias normales
-DELETE FROM PRODUCCION_LECHE WHERE id_vaca = 1;
-DELETE FROM HISTORIAL_CORRAL WHERE id_vaca = 1;
-DELETE FROM EVENTO_SANITARIO WHERE id_vaca = 1;
+-- borrar dependencias
+DELETE FROM PRODUCCION_LECHE WHERE id_vaca = @vaca_id;
+DELETE FROM HISTORIAL_CORRAL WHERE id_vaca = @vaca_id;
+DELETE FROM EVENTO_SANITARIO WHERE id_vaca = @vaca_id;
 
--- 3. ahora sí borrar vaca
-DELETE FROM VACA WHERE id_vaca = 1;
+-- borrar vaca
+DELETE FROM VACA WHERE id_vaca = @vaca_id;
 
 -- =========================
 -- CONSULTAS COMPLEJAS
