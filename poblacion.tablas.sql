@@ -1,5 +1,5 @@
 
-
+USE establo;
 INSERT INTO EMPLEADO (id_empleado, nombre, apellido, cargo, fcha_contrato, salario_base, nmero_tlfono, activo)
 VALUES
 (1, 'Juan',   'Pérez',     'Administrador', '2023-01-15', 2500.00, '987654321', 1),
@@ -16,7 +16,7 @@ VALUES
 (4, 'Vendedor'),
 (5, 'Almacenero');
 
-INSERT INTO CORRAL (id_corral, nombre, capacidad, descripción)
+INSERT INTO CORRAL (id_corral, nombre, capacidad, descripcion)
 VALUES
 (1, 'Corral A', 20, 'Vacas en producción'),
 (2, 'Corral B', 15, 'Vacas secas'),
