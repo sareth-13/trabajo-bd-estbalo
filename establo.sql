@@ -1,11 +1,9 @@
-CREATE DATABASE establo;
-USE establo;
+-- PARTE 1: Sareth
 
--- PARTE 1: Sareth 
 CREATE TABLE EMPLEADO(
     id_empleado INT PRIMARY KEY AUTO_INCREMENT,
     nombre VARCHAR(100),
-    apellido VARCHAR(100), 
+    apellido VARCHAR(100),
     cargo VARCHAR(100),
     fcha_contrato DATE,
     salario_base DECIMAL(10,2),
