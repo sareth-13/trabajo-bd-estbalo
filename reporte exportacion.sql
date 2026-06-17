@@ -6,7 +6,7 @@ USE establo;
 SELECT 
     v.id_vaca,
     v.arete,
-    COUNT(p.id_vaca) AS numero_registros,
+    COUNT(p.id_vaca) AS numero_registros, -- Corrección aquí
     SUM(p.litros) AS total_litros,
     AVG(p.grasa_prcntaje) AS promedio_grasa,
     AVG(p.solidos_totales_prcntaje) AS promedio_solidos
@@ -15,7 +15,6 @@ LEFT JOIN PRODUCCION_LECHE p ON v.id_vaca = p.id_vaca
 GROUP BY v.id_vaca, v.arete
 ORDER BY total_litros DESC 
 LIMIT 0, 25;
-
 -- ============================================================================
 -- REPORTE: PRODUCCIÓN POR LOTE
 -- ============================================================================
