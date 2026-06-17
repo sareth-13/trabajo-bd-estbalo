@@ -7,7 +7,7 @@ USE establo;
 SELECT 
     v.id_vaca,
     v.arete,
-    COUNT(p.id_vaca) AS numero_registros, -- Corregido para usar una columna existente
+    COUNT(p.id_vaca) AS numero_registros, -- Cambiado aquí
     SUM(p.litros) AS total_litros,
     AVG(p.grasa_prcntaje) AS promedio_grasa,
     AVG(p.solidos_totales_prcntaje) AS promedio_solidos
