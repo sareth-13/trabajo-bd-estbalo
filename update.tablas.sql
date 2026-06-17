@@ -1,14 +1,24 @@
--- UPDATE 1: Sareth - Aumento de salario a supervisores
-UPDATE EMPLEADO
-SET salario_base = salario_base * 1.10
-WHERE cargo = 'Supervisor';
+USE establo;
 
--- UPDATE 2: Luis - Actualizar stock de insumo
-UPDATE INSUMO
-SET stock_actual = stock_actual + 50
-WHERE id_insumo = 1;
+ALTER TABLE EMPLEADO
+MODIFY nombre VARCHAR(100) NOT NULL,
+MODIFY apellido VARCHAR(100) NOT NULL,
+MODIFY cargo VARCHAR(100) NOT NULL,
+MODIFY fecha_contrato DATE NOT NULL,
+MODIFY salario_base DECIMAL(10,2) NOT NULL;
 
--- UPDATE 3: Joaquín - Cambiar estado de una vaca
-UPDATE VACA
-SET estado = 'Vendida'
-WHERE id_vaca = 4;
+ALTER TABLE VACA
+MODIFY arete VARCHAR(50) NOT NULL,
+MODIFY fecha_ingreso DATE NOT NULL;
+
+ALTER TABLE CORRAL
+MODIFY nombre VARCHAR(50) NOT NULL,
+MODIFY capacidad INT NOT NULL;
+
+ALTER TABLE INSUMO
+MODIFY nombre VARCHAR(100) NOT NULL;
+
+ALTER TABLE PAGO_EMPLEADO
+MODIFY mes VARCHAR(20) NOT NULL,
+MODIFY monto_total DECIMAL(10,2) NOT NULL,
+MODIFY fecha_pago DATE NOT NULL;
