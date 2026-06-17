@@ -14,14 +14,13 @@ VALUES
 -- =========================
 -- EMPLEADOS
 -- =========================
-INSERT INTO EMPLEADO (nombre, apellido, cargo, fcha_contrato, salario_base, nmero_tlfono, activo)
+REPLACE INTO EMPLEADO (id_empleado, nombre, apellido, cargo, fcha_contrato, salario_base, nmero_tlfono, activo)
 VALUES
-('Juan', 'Pérez', 'Administrador', '2023-01-15', 2500.00, '987654321', 1),
-('María', 'Gómez', 'Cajera', '2023-03-10', 1800.00, '986123456', 1),
-('Carlos', 'Ramírez', 'Supervisor', '2022-11-05', 3200.00, '985741236', 1),
-('Ana', 'Torres', 'Vendedora', '2024-02-20', 1700.00, '984852963', 1),
-('Luis', 'Fernández', 'Almacenero', '2023-07-12', 1600.00, '983369258', 0);
-
+(1, 'Juan',   'Pérez',     'Administrador', '2023-01-15', 2500.00, '987654321', 1),
+(2, 'María',  'Gómez',     'Cajera',        '2023-03-10', 1800.00, '986123456', 1),
+(3, 'Carlos', 'Ramírez',   'Supervisor',    '2022-11-05', 3200.00, '985741236', 1),
+(4, 'Ana',    'Torres',    'Vendedora',     '2024-02-20', 1700.00, '984852963', 1),
+(5, 'Luis',   'Fernández', 'Almacenero',    '2023-07-12', 1600.00, '983369258', 0);
 -- =========================
 -- CORRALES
 -- =========================
