@@ -1,7 +1,7 @@
 USE establo;
 
 -- =========================
--- CRUD EMPLEADO
+-- CRUD EMPLEADO (SEGURO)
 -- =========================
 
 INSERT INTO EMPLEADO (nombre, apellido, cargo, fcha_contrato, salario_base, nmero_tlfono, activo)
@@ -13,11 +13,14 @@ UPDATE EMPLEADO
 SET salario_base = 2800.00
 WHERE id_empleado = 1;
 
-DELETE FROM EMPLEADO
-WHERE id_empleado = 1;
+-- DELETE SEGURO (BORRAR DEPENDENCIAS PRIMERO)
+DELETE FROM ASISTENCIA WHERE id_empleado = 1;
+DELETE FROM PAGO_EMPLEADO WHERE id_empleado = 1;
+DELETE FROM USUARIO WHERE id_empleado = 1;
+DELETE FROM EMPLEADO WHERE id_empleado = 1;
 
 -- =========================
--- CRUD VACA
+-- CRUD VACA (SEGURO)
 -- =========================
 
 INSERT INTO VACA (arete, fecha_nacimiento, estado, fecha_ingreso)
@@ -29,8 +32,11 @@ UPDATE VACA
 SET estado = 'Gestante'
 WHERE id_vaca = 1;
 
-DELETE FROM VACA
-WHERE id_vaca = 1;
+-- DELETE SEGURO (BORRAR DEPENDENCIAS PRIMERO)
+DELETE FROM PRODUCCION_LECHE WHERE id_vaca = 1;
+DELETE FROM HISTORIAL_CORRAL WHERE id_vaca = 1;
+DELETE FROM EVENTO_SANITARIO WHERE id_vaca = 1;
+DELETE FROM VACA WHERE id_vaca = 1;
 
 -- =========================
 -- CONSULTAS COMPLEJAS
