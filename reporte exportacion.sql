@@ -1,18 +1,15 @@
-USE establo;
 
 -- ============================================================================
 -- REPORTE: PRODUCCIÓN DE LECHE POR VACA (CORREGIDO Y SEGURO)
 -- ============================================================================
+USE establo;
+
 SELECT 
     v.id_vaca,
     v.arete,
-    COUNT(p.id_vaca) AS numero_registros, -- Corrección aquí
-    SUM(p.litros) AS total_litros,
-    AVG(p.grasa_prcntaje) AS promedio_grasa,
-    AVG(p.solidos_totales_prcntaje) AS promedio_solidos
-FROM VACA v
-LEFT JOIN PRODUCCION_LECHE p ON v.id_vaca = p.id_vaca
-GROUP BY v.id_vaca, v.arete
+    (SELECT COUNT(*) FROM produccion_leche WHERE id_vaca = v.id_vaca) AS numero_registros,
+    (SELECT SUM(litros) FROM produccion_leche WHERE id_vaca = v.id_vaca) AS total_litros
+FROM vaca v
 ORDER BY total_litros DESC 
 LIMIT 0, 25;
 -- ============================================================================
