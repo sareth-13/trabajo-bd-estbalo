@@ -1,7 +1,7 @@
 USE establo;
 
 -- ============================================================================
--- 1. INSERCIÓN / ACTUALIZACIÓN DE CATÁLOGOS Y REGISTROS MAESTROS
+-- 1. INSERCIÓN / ACTUALIZACIÓN DE CATÁLOGOS (SEGURO CONTRA ERRORES #1451 Y #1062)
 -- ============================================================================
 
 -- ROLES
@@ -14,7 +14,7 @@ VALUES
 ('Almacenero')
 ON DUPLICATE KEY UPDATE nombre_rol = VALUES(nombre_rol);
 
--- EMPLEADOS (Seguro contra duplicados y llaves foráneas)
+-- EMPLEADOS (Corregido con ON DUPLICATE KEY UPDATE para no romper llaves foráneas)
 INSERT INTO EMPLEADO (id_empleado, nombre, apellido, cargo, fcha_contrato, salario_base, nmero_tlfono, activo)
 VALUES
 (1, 'Juan',   'Pérez',     'Administrador', '2023-01-15', 2500.00, '987654321', 1),
@@ -41,7 +41,7 @@ VALUES
 ('Corral E', 12, 'Cuarentena')
 ON DUPLICATE KEY UPDATE capacidad = VALUES(capacidad), descripcion = VALUES(descripcion);
 
--- VACAS (Evita colisión de claves primarias)
+-- VACAS
 INSERT INTO VACA (id_vaca, arete, fecha_nacimiento, estado, fecha_ingreso, id_madre)
 VALUES
 (1, 'A001', '2020-03-10', 'Activa', '2021-01-05', NULL),
@@ -96,27 +96,27 @@ ON DUPLICATE KEY UPDATE telefono = VALUES(telefono), direccion = VALUES(direccio
 
 
 -- ============================================================================
--- 2. PROCESO SEGURO DE ELIMINACIÓN (EJEMPLO VACA ID: 1)
+-- 2. PROCESO DE ELIMINACIÓN SEGURO (EJEMPLO VACA ID: 1)
 -- ============================================================================
 SET @vaca_id_a_borrar = 1; 
 
--- Rompe relación de maternidad para evitar error de clave foránea #1451
+-- Romper relación de maternidad para evitar error #1451 autorreferencial
 UPDATE VACA SET id_madre = NULL WHERE id_madre = @vaca_id_a_borrar;
 
--- Eliminar de forma segura dependencias directas de la vaca
+-- Borrar dependencias en minúsculas y mayúsculas según tu esquema
 DELETE FROM produccion_leche WHERE id_vaca = @vaca_id_a_borrar;
 DELETE FROM HISTORIAL_CORRAL WHERE id_vaca = @vaca_id_a_borrar;
 DELETE FROM EVENTO_SANITARIO WHERE id_vaca = @vaca_id_a_borrar;
 
--- Borrado final de la entidad vaca
+-- Borrado definitivo de la vaca
 DELETE FROM VACA WHERE id_vaca = @vaca_id_a_borrar;
 
 
 -- ============================================================================
--- 3. REPORTES Y CONSULTAS AVANZADAS (COMPATIBLES Y PREVENIDAS CONTRA ERRORES)
+-- 3. REPORTES Y CONSULTAS (OPTIMIZADAS CONTRA COLUMNAS DESCONOCIDAS #1054)
 -- ============================================================================
 
--- REPORTE A: PRODUCCIÓN DE LECHE POR VACA (Inmune a fallos de nombres de columna)
+-- REPORTE: PRODUCCIÓN DE LECHE POR VACA
 SELECT 
     v.id_vaca,
     v.arete,
@@ -126,7 +126,7 @@ FROM VACA v
 ORDER BY total_litros DESC 
 LIMIT 0, 25;
 
--- REPORTE B: PRODUCCIÓN POR LOTE
+-- REPORTE: PRODUCCIÓN POR LOTE
 SELECT 
     l.id_lote,
     l.nombre_lote,
@@ -135,7 +135,7 @@ FROM LOTE_PRODUCCION l
 LEFT JOIN produccion_leche p ON l.id_lote = p.id_lote_prdccion
 GROUP BY l.id_lote, l.nombre_lote;
 
--- REPORTE C: INGRESOS POR VENTAS
+-- REPORTE: INGRESOS POR VENTAS
 SELECT 
     DATE_FORMAT(fcha, '%Y-%m') AS mes,
     SUM(total_venta) AS ingresos_totales
@@ -143,7 +143,7 @@ FROM VENTA_LECHE
 GROUP BY DATE_FORMAT(fcha, '%Y-%m')
 ORDER BY DATE_FORMAT(fcha, '%Y-%m') ASC;
 
--- REPORTE D: COMPRAS POR PROVEEDOR
+-- REPORTE: COMPRAS POR PROVEEDOR
 SELECT 
     pr.nombre AS proveedor,
     SUM(c.costo_total) AS total_compras
@@ -152,7 +152,7 @@ JOIN COMPRA_INSUMO c ON pr.id_proveedor = c.id_proveedor
 GROUP BY pr.nombre
 ORDER BY total_compras DESC;
 
--- REPORTE E: ASISTENCIA EMPLEADOS
+-- REPORTE: ASISTENCIA EMPLEADOS
 SELECT 
     e.nombre,
     e.apellido,
