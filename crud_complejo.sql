@@ -28,14 +28,17 @@ VALUES ('A001', '2020-03-10', 'Activa', '2021-01-05');
 
 SELECT * FROM VACA;
 
+-- 1. quitar relación de madre primero
 UPDATE VACA
-SET estado = 'Gestante'
-WHERE id_vaca = 1;
+SET id_madre = NULL
+WHERE id_madre = 1;
 
--- DELETE SEGURO (BORRAR DEPENDENCIAS PRIMERO)
+-- 2. borrar dependencias normales
 DELETE FROM PRODUCCION_LECHE WHERE id_vaca = 1;
 DELETE FROM HISTORIAL_CORRAL WHERE id_vaca = 1;
 DELETE FROM EVENTO_SANITARIO WHERE id_vaca = 1;
+
+-- 3. ahora sí borrar vaca
 DELETE FROM VACA WHERE id_vaca = 1;
 
 -- =========================
