@@ -1,13 +1,12 @@
 USE establo;
 
 -- ============================================================================
--- REPORTE: PRODUCCIÓN DE LECHE POR VACA (CORREGIDO)
+-- REPORTE: PRODUCCIÓN DE LECHE POR VACA (CORREGIDO Y SEGURO)
 -- ============================================================================
-
 SELECT 
     v.id_vaca,
     v.arete,
-    COUNT(p.id_vaca) AS numero_registros, -- Cambiado aquí
+    COUNT(p.id_vaca) AS numero_registros,
     SUM(p.litros) AS total_litros,
     AVG(p.grasa_prcntaje) AS promedio_grasa,
     AVG(p.solidos_totales_prcntaje) AS promedio_solidos
@@ -20,7 +19,6 @@ LIMIT 0, 25;
 -- ============================================================================
 -- REPORTE: PRODUCCIÓN POR LOTE
 -- ============================================================================
-
 SELECT 
     l.id_lote,
     l.nombre_lote,
@@ -30,20 +28,18 @@ LEFT JOIN PRODUCCION_LECHE p ON l.id_lote = p.id_lote_prdccion
 GROUP BY l.id_lote, l.nombre_lote;
 
 -- ============================================================================
--- REPORTE: INGRESOS POR VENTAS
+-- REPORTE: INGRESOS POR VENTAS (OPTIMIZADO)
 -- ============================================================================
-
 SELECT 
-    DATE_FORMAT(fcha, '%Y-%m') AS mes,
+    DATE_FORMAT(fcha, '%Y-%m') AS mes, 
     SUM(total_venta) AS ingresos_totales
 FROM VENTA_LECHE
-GROUP BY DATE_FORMAT(fcha, '%Y-%m')
-ORDER BY mes;
+GROUP BY DATE_FORMAT(fcha, '%Y-%m') -- Agrupación explícita por la función de fecha
+ORDER BY DATE_FORMAT(fcha, '%Y-%m') ASC; -- Ordenamiento cronológico estricto
 
 -- ============================================================================
 -- REPORTE: COMPRAS POR PROVEEDOR
 -- ============================================================================
-
 SELECT 
     pr.nombre AS proveedor,
     SUM(c.costo_total) AS total_compras
@@ -55,11 +51,10 @@ ORDER BY total_compras DESC;
 -- ============================================================================
 -- REPORTE: ASISTENCIA EMPLEADOS
 -- ============================================================================
-
 SELECT 
     e.nombre,
     e.apellido,
     SUM(a.presente) AS dias_asistidos
 FROM EMPLEADO e
 JOIN ASISTENCIA a ON e.id_empleado = a.id_empleado
-GROUP BY e.id_empleado, e.nombre, e.apellido; -- Añadidos al GROUP BY por estándar SQL
+GROUP BY e.id_empleado, e.nombre, e.apellido;
