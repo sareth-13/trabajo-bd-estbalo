@@ -1,7 +1,10 @@
 USE establo;
 
+-- Desactivar restricciones temporalmente para la carga inicial limpia
+SET FOREIGN_KEY_CHECKS = 0;
+
 -- ============================================================================
--- 1. INSERCIÓN / ACTUALIZACIÓN DE CATÁLOGOS (SEGURO CONTRA ERRORES #1451 Y #1062)
+-- 1. REGISTROS MAESTROS (CON ON DUPLICATE KEY UPDATE)
 -- ============================================================================
 
 -- ROLES
@@ -14,7 +17,7 @@ VALUES
 ('Almacenero')
 ON DUPLICATE KEY UPDATE nombre_rol = VALUES(nombre_rol);
 
--- EMPLEADOS (Corregido con ON DUPLICATE KEY UPDATE para no romper llaves foráneas)
+-- EMPLEADOS
 INSERT INTO EMPLEADO (id_empleado, nombre, apellido, cargo, fcha_contrato, salario_base, nmero_tlfono, activo)
 VALUES
 (1, 'Juan',   'Pérez',     'Administrador', '2023-01-15', 2500.00, '987654321', 1),
@@ -94,26 +97,29 @@ VALUES
 ('Mercado Central', '20555666777', '983555666', 'Plaza Mayor 500')
 ON DUPLICATE KEY UPDATE telefono = VALUES(telefono), direccion = VALUES(direccion);
 
+-- Reactivar las restricciones de integridad de datos
+SET FOREIGN_KEY_CHECKS = 1;
+
 
 -- ============================================================================
--- 2. PROCESO DE ELIMINACIÓN SEGURO (EJEMPLO VACA ID: 1)
+-- 2. OPERACIONES SEGURAS DE BORRADO (VACA ID: 1)
 -- ============================================================================
 SET @vaca_id_a_borrar = 1; 
 
--- Romper relación de maternidad para evitar error #1451 autorreferencial
+-- Desvincular de la relación madre-hijo
 UPDATE VACA SET id_madre = NULL WHERE id_madre = @vaca_id_a_borrar;
 
--- Borrar dependencias en minúsculas y mayúsculas según tu esquema
+-- Limpieza de dependencias conocidas en minúsculas
 DELETE FROM produccion_leche WHERE id_vaca = @vaca_id_a_borrar;
 DELETE FROM HISTORIAL_CORRAL WHERE id_vaca = @vaca_id_a_borrar;
 DELETE FROM EVENTO_SANITARIO WHERE id_vaca = @vaca_id_a_borrar;
 
--- Borrado definitivo de la vaca
+-- Borrar la entidad
 DELETE FROM VACA WHERE id_vaca = @vaca_id_a_borrar;
 
 
 -- ============================================================================
--- 3. REPORTES Y CONSULTAS (OPTIMIZADAS CONTRA COLUMNAS DESCONOCIDAS #1054)
+-- 3. REPORTES COMPATIBLES (SIN COLUMNAS DESCONOCIDAS)
 -- ============================================================================
 
 -- REPORTE: PRODUCCIÓN DE LECHE POR VACA
