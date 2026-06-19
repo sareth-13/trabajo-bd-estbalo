@@ -1,49 +1,13 @@
 USE establo;
 
-CREATE INDEX idx_empleado_nombre
-ON EMPLEADO(nombre);
+ALTER TABLE produccion_leche DROP INDEX idx_prod_vaca;
+ALTER TABLE produccion_leche DROP INDEX idx_prod_lote;
+ALTER TABLE VENTA_LECHE DROP INDEX idx_ventas_fecha;
+ALTER TABLE COMPRA_INSUMO DROP INDEX idx_compras_fecha;
+ALTER TABLE ASISTENCIA DROP INDEX idx_asistencia_emp;
 
-CREATE INDEX idx_empleado_apellido
-ON EMPLEADO(apellido);
-
-CREATE INDEX idx_vaca_estado
-ON VACA(estado);
-
-CREATE INDEX idx_vaca_fecha_ingreso
-ON VACA(fecha_ingreso);
-
-CREATE INDEX idx_corral_capacidad
-ON CORRAL(capacidad);
-
-CREATE INDEX idx_produccion_vaca
-ON PRODUCCION_LECHE(id_vaca);
-
-CREATE INDEX idx_produccion_lote
-ON PRODUCCION_LECHE(id_lote_prdccion);
-
-CREATE INDEX idx_produccion_fecha
-ON PRODUCCION_LECHE(fcha);
-
-CREATE INDEX idx_venta_lote
-ON VENTA_LECHE(id_lote_prdccion);
-
-CREATE INDEX idx_insumo_nombre
-ON INSUMO(nombre);
-
-CREATE INDEX idx_compra_proveedor
-ON COMPRA_INSUMO(id_proveedor);
-
-CREATE INDEX idx_compra_insumo
-ON COMPRA_INSUMO(id_insumo);
-
-CREATE INDEX idx_pago_empleado
-ON PAGO_EMPLEADO(id_empleado);
-
-CREATE INDEX idx_evento_vaca
-ON EVENTO_SANITARIO(id_vaca);
-
-CREATE INDEX idx_historial_vaca
-ON HISTORIAL_CORRAL(id_vaca);
-
-CREATE INDEX idx_historial_corral
-ON HISTORIAL_CORRAL(id_corral);
+ALTER TABLE produccion_leche ADD INDEX idx_prod_vaca (id_vaca);
+ALTER TABLE produccion_leche ADD INDEX idx_prod_lote (id_lote_prdccion);
+ALTER TABLE VENTA_LECHE ADD INDEX idx_ventas_fecha (fcha);
+ALTER TABLE COMPRA_INSUMO ADD INDEX idx_compras_fecha (fcha);
+ALTER TABLE ASISTENCIA ADD INDEX idx_asistencia_emp (id_empleado);
