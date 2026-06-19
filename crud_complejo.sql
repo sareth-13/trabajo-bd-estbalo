@@ -1,95 +1,73 @@
 USE establo;
 
 -- ============================================================================
--- CRUD EMPLEADO (SEGURO)
+-- 1. [CREATE] - INSERCIÓN COMPLEJA CON TRANSACCIÓN (Venta y Registro)
 -- ============================================================================
+START TRANSACTION;
 
--- 1. Insertar empleado
-INSERT INTO EMPLEADO (nombre, apellido, cargo, fcha_contrato, salario_base, nmero_tlfono, activo)
-VALUES ('Juan', 'Pérez', 'Administrador', '2023-01-15', 2500.00, '987654321', 1);
+-- Definir los datos de la venta en variables
+SET @cliente_id = 1;
+SET @fecha_venta = '2026-06-19';
+SET @total_dinero = 1500.00;
 
--- 2. Verificar inserción
-SELECT * FROM EMPLEADO;
+-- Insertar la venta principal
+INSERT INTO VENTA_LECHE (id_cliente, fcha, total_venta) 
+VALUES (@cliente_id, @fecha_venta, @total_dinero);
 
--- 3. Actualizar último empleado insertado (más seguro que id fijo)
-UPDATE EMPLEADO
-SET salario_base = 2800.00
-ORDER BY id_empleado DESC
-LIMIT 1;
+-- Guardar el ID generado automáticamente de esa venta para auditoría posterior
+SET @ultimo_id_venta = LAST_INSERT_ID();
 
--- 4. DELETE SEGURO EMPLEADO
-SET @emp_id = (SELECT MAX(id_empleado) FROM EMPLEADO);
-
-DELETE FROM ASISTENCIA WHERE id_empleado = @emp_id;
-DELETE FROM PAGO_EMPLEADO WHERE id_empleado = @emp_id;
-DELETE FROM USUARIO WHERE id_empleado = @emp_id;
-DELETE FROM EMPLEADO WHERE id_empleado = @emp_id;
+COMMIT;
 
 
 -- ============================================================================
--- CRUD VACA (SEGURO Y CORREGIDO)
+-- 2. [READ] - LECTURA COMPLEJA (Consulta con JOINs, Filtros y Agrupaciones)
 -- ============================================================================
+SET @cliente_buscado = 1;
 
--- 1. Insertar vaca
-INSERT INTO VACA (arete, fecha_nacimiento, estado, fecha_ingreso)
-VALUES ('A001', '2020-03-10', 'Activa', '2021-01-05');
-
--- 2. Verificar inserción
-SELECT * FROM VACA;
-
--- 3. Definir ID de la vaca que se quiere borrar (Ejemplo con ID: 1)
--- Nota: Cambia el '1' por el ID de la vaca que realmente desees eliminar.
-SET @vaca_id_a_borrar = 1; 
-
--- 4. CORRECCIÓN DEL ERROR #1451: Romper relación de maternidad (Hijos de esta vaca)
--- Esto evita el fallo de restricción de clave foránea autorreferencial
-UPDATE VACA
-SET id_madre = NULL
-WHERE id_madre = @vaca_id_a_borrar;
-
--- 5. Borrar dependencias en otras tablas
-DELETE FROM PRODUCCION_LECHE WHERE id_vaca = @vaca_id_a_borrar;
-DELETE FROM HISTORIAL_CORRAL WHERE id_vaca = @vaca_id_a_borrar;
-DELETE FROM EVENTO_SANITARIO WHERE id_vaca = @vaca_id_a_borrar;
-
--- 6. Finalmente, borrar la vaca de forma segura
-DELETE FROM VACA WHERE id_vaca = @vaca_id_a_borrar;
-
-
--- ============================================================================
--- CONSULTAS COMPLEJAS
--- ============================================================================
-
--- Producción por vaca
 SELECT 
-    v.id_vaca,
-    v.arete,
-    SUM(p.litros) AS total_litros
-FROM VACA v
-JOIN PRODUCCION_LECHE p ON v.id_vaca = p.id_vaca
-GROUP BY v.id_vaca, v.arete;
+    v.id_venta,
+    c.nombre AS nombre_cliente,
+    c.ruc,
+    v.fcha AS fecha_operacion,
+    v.total_venta AS monto_total
+FROM VENTA_LECHE v
+INNER JOIN CLIENTE c ON v.id_cliente = c.id_cliente
+WHERE v.id_cliente = @cliente_buscado
+ORDER BY v.fcha DESC;
 
--- Ventas por lote
-SELECT 
-    l.id_lote,
-    SUM(vl.total_venta) AS ingresos_totales
-FROM LOTE_PRODUCCION l
-JOIN VENTA_LECHE vl ON l.id_lote = vl.id_lote_prdccion
-GROUP BY l.id_lote;
 
--- Compras por proveedor
-SELECT 
-    pr.nombre,
-    SUM(c.costo_total) AS total_gastado
-FROM PROVEEDOR pr
-JOIN COMPRA_INSUMO c ON pr.id_proveedor = c.id_proveedor
-GROUP BY pr.nombre;
+-- ============================================================================
+-- 3. [UPDATE] - ACTUALIZACIÓN COMPLEJA (Modificación condicional)
+-- ============================================================================
+-- Si el cliente cambia de dirección, actualizamos su ubicación y recalculamos 
+-- el total de una venta específica si se le aplicó un recargo por delivery.
+SET @cliente_a_actualizar = 1;
+SET @nueva_direccion = 'Av. Industrial 500, Arequipa';
 
--- Empleados con pagos
-SELECT 
-    e.nombre,
-    e.apellido,
-    p.monto_total,
-    p.mes
-FROM EMPLEADO e
-JOIN PAGO_EMPLEADO p ON e.id_empleado = p.id_empleado;
+UPDATE CLIENTE 
+SET direccion = @nueva_direccion 
+WHERE id_cliente = @cliente_a_actualizar;
+
+UPDATE VENTA_LECHE 
+SET total_venta = total_venta * 1.05 
+WHERE id_cliente = @cliente_a_actualizar AND fcha = '2026-06-19';
+
+
+-- ============================================================================
+-- 4. [DELETE] - BORRADO COMPLEJO (Limpieza en cascada manual)
+-- ============================================================================
+-- Para borrar un cliente de forma segura sin romper las llaves foráneas:
+START TRANSACTION;
+
+SET @cliente_a_eliminar = 5;
+
+-- Primero borramos el historial de sus ventas para evitar errores de restricción
+DELETE FROM VENTA_LECHE 
+WHERE id_cliente = @cliente_a_eliminar;
+
+-- Ahora borramos definitivamente al cliente
+DELETE FROM CLIENTE 
+WHERE id_cliente = @cliente_a_eliminar;
+
+COMMIT;
