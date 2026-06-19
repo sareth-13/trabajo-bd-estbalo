@@ -1,73 +1,84 @@
 USE establo;
+ 
+DELIMITER $$
 
--- ============================================================================
--- 1. [CREATE] - INSERCIÓN COMPLEJA CON TRANSACCIÓN (Venta y Registro)
--- ============================================================================
-START TRANSACTION;
+DROP PROCEDURE IF EXISTS sp_alta_empleado_completo $$
+CREATE PROCEDURE sp_alta_empleado_completo (
+    IN p_nombre          VARCHAR(100),
+    IN p_apellido        VARCHAR(100),
+    IN p_cargo           VARCHAR(100),
+    IN p_fecha_contrato  DATE,
+    IN p_salario_base    DECIMAL(10,2),
+    IN p_telefono        VARCHAR(20),
+    IN p_nombre_usuario  VARCHAR(50),
+    IN p_password_hash   VARCHAR(225),
+    IN p_id_rol          INT
+)
+BEGIN
+    DECLARE v_id_empleado INT;
+    DECLARE v_id_usuario  INT;
+ 
+    INSERT INTO EMPLEADO (nombre, apellido, cargo, fecha_contrato, salario_base, telefono, activo)
+    VALUES (p_nombre, p_apellido, p_cargo, p_fecha_contrato, p_salario_base, p_telefono, TRUE);
+ 
+    SET v_id_empleado = LAST_INSERT_ID();
+ 
+    INSERT INTO USUARIO (id_empleado, nombre_usuario, password_hash, activo)
+    VALUES (v_id_empleado, p_nombre_usuario, p_password_hash, TRUE);
+ 
+    SET v_id_usuario = LAST_INSERT_ID();
+ 
+    INSERT INTO USUARIO_ROL (id_usuario, id_rol)
+    VALUES (v_id_usuario, p_id_rol);
+ 
+    SELECT v_id_empleado AS id_empleado, v_id_usuario AS id_usuario;
+END $$
 
--- Definir los datos de la venta en variables
-SET @cliente_id = 1;
-SET @fecha_venta = '2026-06-19';
-SET @total_dinero = 1500.00;
+DROP PROCEDURE IF EXISTS sp_trasladar_vaca $$
+CREATE PROCEDURE sp_trasladar_vaca (
+    IN p_id_vaca         INT,
+    IN p_id_corral_nuevo INT,
+    IN p_motivo          VARCHAR(225)
+)
+BEGIN
+    UPDATE HISTORIAL_CORRAL
+       SET fecha_salida = CURDATE()
+     WHERE id_vaca = p_id_vaca
+       AND fecha_salida IS NULL;
+ 
+    INSERT INTO HISTORIAL_CORRAL (id_vaca, id_corral, fecha_entrada, motivo)
+    VALUES (p_id_vaca, p_id_corral_nuevo, CURDATE(), p_motivo);
+ 
+    UPDATE VACA
+       SET estado = 'ACTIVA'
+     WHERE id_vaca = p_id_vaca;
+END $$
 
--- Insertar la venta principal
-INSERT INTO VENTA_LECHE (id_cliente, fcha, total_venta) 
-VALUES (@cliente_id, @fecha_venta, @total_dinero);
-
--- Guardar el ID generado automáticamente de esa venta para auditoría posterior
-SET @ultimo_id_venta = LAST_INSERT_ID();
-
-COMMIT;
-
-
--- ============================================================================
--- 2. [READ] - LECTURA COMPLEJA (Consulta con JOINs, Filtros y Agrupaciones)
--- ============================================================================
-SET @cliente_buscado = 1;
-
-SELECT 
-    v.id_venta,
-    c.nombre AS nombre_cliente,
-    c.ruc,
-    v.fcha AS fecha_operacion,
-    v.total_venta AS monto_total
-FROM VENTA_LECHE v
-INNER JOIN CLIENTE c ON v.id_cliente = c.id_cliente
-WHERE v.id_cliente = @cliente_buscado
-ORDER BY v.fcha DESC;
-
-
--- ============================================================================
--- 3. [UPDATE] - ACTUALIZACIÓN COMPLEJA (Modificación condicional)
--- ============================================================================
--- Si el cliente cambia de dirección, actualizamos su ubicación y recalculamos 
--- el total de una venta específica si se le aplicó un recargo por delivery.
-SET @cliente_a_actualizar = 1;
-SET @nueva_direccion = 'Av. Industrial 500, Arequipa';
-
-UPDATE CLIENTE 
-SET direccion = @nueva_direccion 
-WHERE id_cliente = @cliente_a_actualizar;
-
-UPDATE VENTA_LECHE 
-SET total_venta = total_venta * 1.05 
-WHERE id_cliente = @cliente_a_actualizar AND fcha = '2026-06-19';
-
-
--- ============================================================================
--- 4. [DELETE] - BORRADO COMPLEJO (Limpieza en cascada manual)
--- ============================================================================
--- Para borrar un cliente de forma segura sin romper las llaves foráneas:
-START TRANSACTION;
-
-SET @cliente_a_eliminar = 5;
-
--- Primero borramos el historial de sus ventas para evitar errores de restricción
-DELETE FROM VENTA_LECHE 
-WHERE id_cliente = @cliente_a_eliminar;
-
--- Ahora borramos definitivamente al cliente
-DELETE FROM CLIENTE 
-WHERE id_cliente = @cliente_a_eliminar;
-
-COMMIT;
+DROP PROCEDURE IF EXISTS sp_registrar_compra_insumo $$
+CREATE PROCEDURE sp_registrar_compra_insumo (
+    IN p_id_insumo      INT,
+    IN p_id_proveedor   INT,
+    IN p_fecha_compra   DATE,
+    IN p_cantidad       DECIMAL(10,2),
+    IN p_costo_total    DECIMAL(10,2),
+    IN p_factura_numero VARCHAR(50)
+)
+BEGIN
+    DECLARE v_existe_proveedor INT;
+ 
+    SELECT COUNT(*) INTO v_existe_proveedor
+    FROM PROVEEDOR WHERE id_proveedor = p_id_proveedor;
+ 
+    IF v_existe_proveedor = 0 THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'El proveedor indicado no existe.';
+    END IF;
+ 
+    INSERT INTO COMPRA_INSUMO (id_insumo, id_proveedor, fecha_compra, cantidad, costo_total, factura_numero)
+    VALUES (p_id_insumo, p_id_proveedor, p_fecha_compra, p_cantidad, p_costo_total, p_factura_numero);
+ 
+    UPDATE INSUMO
+       SET stock_actual = stock_actual + p_cantidad,
+           precio_unitario = ROUND(p_costo_total / p_cantidad, 2)
+     WHERE id_insumo = p_id_insumo;
+END $$
