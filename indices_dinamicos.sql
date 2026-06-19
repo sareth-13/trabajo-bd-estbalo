@@ -1,26 +1,21 @@
 USE establo;
 
--- =========================
--- ÍNDICE DINÁMICO: PRODUCCIÓN POR VACA
--- (se usa cuando hay consultas por vaca)
--- =========================
-CREATE INDEX idx_dyn_produccion_vaca
-ON PRODUCCION_LECHE(id_vaca);
+SET @fecha_inicio = '2026-01-01';
+SET @fecha_fin    = '2026-03-31';
+SET @empleado_buscado = 3;
 
--- =========================
--- ÍNDICE DINÁMICO: FILTRO POR FECHA
--- (reportes mensuales)
--- =========================
-CREATE INDEX idx_dyn_produccion_fecha
-ON PRODUCCION_LECHE(fcha);
+SELECT 
+    DATE_FORMAT(fcha, '%Y-%m') AS mes,
+    SUM(total_venta) AS ingresos_totales
+FROM VENTA_LECHE
+WHERE fcha BETWEEN @fecha_inicio AND @fecha_fin
+GROUP BY DATE_FORMAT(fcha, '%Y-%m')
+ORDER BY mes ASC;
 
--- =========================
--- ÍNDICE DINÁMICO: VENTAS
--- =========================
-CREATE INDEX idx_dyn_venta_lote
-ON VENTA_LECHE(id_lote_prdccion);
-
--- =========================
--- CUANDO YA NO SE USAN (EJEMPLO)
--- =========================
--- DROP INDEX idx_dyn_produccion_fecha ON PRODUCCION_LECHE;
+SELECT 
+    id_empleado,
+    nombre,
+    apellido,
+    dias_asistidos 
+FROM vista_asistencia_empleados 
+WHERE id_empleado = @empleado_buscado;
