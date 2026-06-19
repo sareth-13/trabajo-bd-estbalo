@@ -1,55 +1,41 @@
 USE establo;
 
--- =========================
--- VIEW 1: Producción por vaca
--- =========================
-CREATE VIEW vw_produccion_vaca AS
+CREATE OR REPLACE VIEW vista_produccion_vaca AS
 SELECT 
-    v.id_vaca,
-    v.arete,
-    p.fcha,
-    p.litros,
-    p.grasa_prcntaje,
-    p.solidos_totales_prcntaje
-FROM VACA v
-JOIN PRODUCCION_LECHE p ON v.id_vaca = p.id_vaca;
+    v.id_vaca, v.arete,
+    (SELECT COUNT(*) FROM produccion_leche WHERE id_vaca = v.id_vaca) AS numero_registros,
+    (SELECT SUM(litros) FROM produccion_leche WHERE id_vaca = v.id_vaca) AS total_litros
+FROM VACA v;
 
--- =========================
--- VIEW 2: Ventas completas
--- =========================
-CREATE VIEW vw_ventas AS
+CREATE OR REPLACE VIEW vista_produccion_lote AS
 SELECT 
-    v.id_venta,
-    v.fcha,
-    v.litros_vendidos,
-    v.precio_por_litro,
-    v.total_venta,
-    l.nombre_lote
-FROM VENTA_LECHE v
-JOIN LOTE_PRODUCCION l ON v.id_lote_prdccion = l.id_lote;
+    l.id_lote, l.nombre_lote, SUM(p.litros) AS total_producido
+FROM LOTE_PRODUCCION l
+LEFT JOIN produccion_leche p ON l.id_lote = p.id_lote_prdccion
+GROUP BY l.id_lote, l.nombre_lote;
 
--- =========================
--- VIEW 3: Empleados y pagos
--- =========================
-CREATE VIEW vw_empleados_pagos AS
+CREATE OR REPLACE VIEW vista_ingresos_ventas AS
 SELECT 
-    e.id_empleado,
-    e.nombre,
-    e.apellido,
-    p.mes,
-    p.monto_total,
-    p.bonos
+    DATE_FORMAT(fcha, '%Y-%m') AS mes, SUM(total_venta) AS ingresos_totales
+FROM VENTA_LECHE
+GROUP BY DATE_FORMAT(fcha, '%Y-%m');
+
+CREATE OR REPLACE VIEW vista_compras_proveedor AS
+SELECT 
+    pr.nombre AS proveedor, SUM(c.costo_total) AS total_compras
+FROM PROVEEDOR pr
+JOIN COMPRA_INSUMO c ON pr.id_proveedor = c.id_proveedor
+GROUP BY pr.nombre;
+
+CREATE OR REPLACE VIEW vista_asistencia_empleados AS
+SELECT 
+    e.id_empleado, e.nombre, e.apellido, SUM(a.presente) AS dias_asistidos
 FROM EMPLEADO e
-JOIN PAGO_EMPLEADO p ON e.id_empleado = p.id_empleado;
+JOIN ASISTENCIA a ON e.id_empleado = a.id_empleado
+GROUP BY e.id_empleado, e.nombre, e.apellido;
 
--- =========================
--- VIEW 4: Inventario de insumos
--- =========================
-CREATE VIEW vw_insumos AS
-SELECT 
-    id_insumo,
-    nombre,
-    stock_actual,
-    stock_minimo,
-    precio_unitario
-FROM INSUMO;
+SELECT * FROM vista_produccion_vaca;
+SELECT * FROM vista_produccion_lote;
+SELECT * FROM vista_ingresos_ventas;
+SELECT * FROM vista_compras_proveedor;
+SELECT * FROM vista_asistencia_empleados;
