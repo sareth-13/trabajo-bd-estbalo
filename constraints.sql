@@ -73,3 +73,103 @@ ALTER TABLE PAGO_EMPLEADO
  
 ALTER TABLE EVENTO_SANITARIO
     ADD CONSTRAINT ck_evento_costo CHECK (costo >= 0);
+
+ALTER TABLE USUARIO DROP FOREIGN KEY fk_usuario_empleado;
+ALTER TABLE USUARIO
+    ADD CONSTRAINT fk_usuario_empleado
+        FOREIGN KEY (id_empleado) REFERENCES EMPLEADO(id_empleado)
+        ON DELETE CASCADE;
+ 
+ALTER TABLE USUARIO_ROL DROP FOREIGN KEY fk_usuariorol_usuario;
+ALTER TABLE USUARIO_ROL DROP FOREIGN KEY fk_usuariorol_rol;
+ALTER TABLE USUARIO_ROL
+    ADD CONSTRAINT fk_usuariorol_usuario
+        FOREIGN KEY (id_usuario) REFERENCES USUARIO(id_usuario)
+        ON DELETE CASCADE,
+    ADD CONSTRAINT fk_usuariorol_rol
+        FOREIGN KEY (id_rol) REFERENCES ROL(id_rol)
+        ON DELETE CASCADE;
+ 
+
+ALTER TABLE ASISTENCIA DROP FOREIGN KEY fk_asistencia_empleado;
+ALTER TABLE ASISTENCIA
+    ADD CONSTRAINT fk_asistencia_empleado
+        FOREIGN KEY (id_empleado) REFERENCES EMPLEADO(id_empleado)
+        ON DELETE CASCADE;
+ 
+
+ALTER TABLE PAGO_EMPLEADO DROP FOREIGN KEY fk_pago_empleado;
+ALTER TABLE PAGO_EMPLEADO
+    ADD CONSTRAINT fk_pago_empleado
+        FOREIGN KEY (id_empleado) REFERENCES EMPLEADO(id_empleado)
+        ON DELETE SET NULL;
+ 
+
+ALTER TABLE VACA DROP FOREIGN KEY fk_vaca_madre;
+ALTER TABLE VACA
+    ADD CONSTRAINT fk_vaca_madre
+        FOREIGN KEY (id_madre) REFERENCES VACA(id_vaca)
+        ON DELETE SET NULL;
+ 
+
+ALTER TABLE HISTORIAL_CORRAL DROP FOREIGN KEY fk_historial_vaca;
+ALTER TABLE HISTORIAL_CORRAL DROP FOREIGN KEY fk_historial_corral;
+ALTER TABLE HISTORIAL_CORRAL
+    MODIFY id_corral INT NULL;
+ALTER TABLE HISTORIAL_CORRAL
+    ADD CONSTRAINT fk_historial_vaca
+        FOREIGN KEY (id_vaca) REFERENCES VACA(id_vaca)
+        ON DELETE CASCADE,
+    ADD CONSTRAINT fk_historial_corral
+        FOREIGN KEY (id_corral) REFERENCES CORRAL(id_corral)
+        ON DELETE SET NULL;
+ 
+
+ALTER TABLE PRODUCCION_LECHE DROP FOREIGN KEY fk_produccion_vaca;
+ALTER TABLE PRODUCCION_LECHE DROP FOREIGN KEY fk_produccion_lote;
+ALTER TABLE PRODUCCION_LECHE
+    MODIFY id_lote INT NULL;
+ALTER TABLE PRODUCCION_LECHE
+    ADD CONSTRAINT fk_produccion_vaca
+        FOREIGN KEY (id_vaca) REFERENCES VACA(id_vaca)
+        ON DELETE CASCADE,
+    ADD CONSTRAINT fk_produccion_lote
+        FOREIGN KEY (id_lote) REFERENCES LOTE_PRODUCCION(id_lote)
+        ON DELETE SET NULL;
+ 
+
+ALTER TABLE VENTA_LECHE DROP FOREIGN KEY fk_venta_lote;
+ALTER TABLE VENTA_LECHE DROP FOREIGN KEY fk_venta_cliente;
+ALTER TABLE VENTA_LECHE
+    ADD CONSTRAINT fk_venta_lote
+        FOREIGN KEY (id_lote) REFERENCES LOTE_PRODUCCION(id_lote)
+        ON DELETE SET NULL,
+    ADD CONSTRAINT fk_venta_cliente
+        FOREIGN KEY (id_cliente) REFERENCES CLIENTE(id_cliente)
+        ON DELETE SET NULL;
+ 
+
+ALTER TABLE COMPRA_INSUMO DROP FOREIGN KEY fk_compra_insumo;
+ALTER TABLE COMPRA_INSUMO DROP FOREIGN KEY fk_compra_proveedor;
+ALTER TABLE COMPRA_INSUMO
+    ADD CONSTRAINT fk_compra_insumo
+        FOREIGN KEY (id_insumo) REFERENCES INSUMO(id_insumo)
+        ON DELETE SET NULL,
+    ADD CONSTRAINT fk_compra_proveedor
+        FOREIGN KEY (id_proveedor) REFERENCES PROVEEDOR(id_proveedor)
+        ON DELETE SET NULL;
+ 
+
+ALTER TABLE EVENTO_SANITARIO DROP FOREIGN KEY fk_evento_vaca;
+ALTER TABLE EVENTO_SANITARIO DROP FOREIGN KEY fk_evento_veterinario;
+ALTER TABLE EVENTO_SANITARIO DROP FOREIGN KEY fk_evento_insumo;
+ALTER TABLE EVENTO_SANITARIO
+    ADD CONSTRAINT fk_evento_vaca
+        FOREIGN KEY (id_vaca) REFERENCES VACA(id_vaca)
+        ON DELETE CASCADE,
+    ADD CONSTRAINT fk_evento_veterinario
+        FOREIGN KEY (id_veterinario) REFERENCES EMPLEADO(id_empleado)
+        ON DELETE SET NULL,
+    ADD CONSTRAINT fk_evento_insumo
+        FOREIGN KEY (id_insumo) REFERENCES INSUMO(id_insumo)
+        ON DELETE SET NULL;
