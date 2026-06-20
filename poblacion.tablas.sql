@@ -80,3 +80,33 @@ INSERT INTO ASISTENCIA (id_empleado, fecha, presente) VALUES
 (4, '2026-06-01', FALSE), (4, '2026-06-02', FALSE), (4, '2026-06-03', FALSE),
 (5, '2026-06-01', TRUE), (5, '2026-06-02', TRUE), (5, '2026-06-03', TRUE);
 
+INSERT INTO VACA (id_vaca, arete, fecha_nacimiento, estado, fecha_ingreso, fecha_venta_muerte, id_madre) VALUES
+(1, 'A001', '2020-03-10', 'ACTIVA',   '2021-01-05', NULL, NULL),
+(2, 'A002', '2019-07-22', 'ACTIVA',   '2020-02-10', NULL, NULL),
+(3, 'A003', '2021-05-15', 'GESTANTE', '2022-01-20', NULL, 1),
+(4, 'A004', '2018-11-30', 'SECA',     '2019-06-15', NULL, 2),
+(5, 'A005', '2024-08-01', 'TERNERA',  '2024-08-01', NULL, 1);
+ 
+INSERT INTO HISTORIAL_CORRAL (id_vaca, id_corral, fecha_entrada, fecha_salida, motivo) VALUES
+(1, 1, '2026-01-05', NULL, 'Ingreso a producción'),
+(2, 1, '2026-01-10', NULL, 'Ingreso a producción'),
+(3, 4, '2026-02-01', NULL, 'Traslado por gestación'),
+(4, 2, '2026-01-15', NULL, 'Periodo de secado'),
+(5, 3, '2024-08-01', NULL, 'Corral de terneras');
+ 
+
+INSERT INTO PRODUCCION_LECHE (id_vaca, id_lote, fecha, litros, grasa_porcentaje, solidos_totales_porcentaje, turno) VALUES
+(1, 5, '2026-05-02', 18.50, 3.80, 12.50, 'MAÑANA'),
+(1, 5, '2026-05-02', 14.20, 3.75, 12.30, 'TARDE'),
+(1, 5, '2026-05-03', 18.90, 3.82, 12.60, 'MAÑANA'),
+(2, 5, '2026-05-02', 20.10, 4.00, 13.00, 'MAÑANA'),
+(2, 5, '2026-05-02', 15.80, 3.90, 12.80, 'TARDE'),
+(2, 5, '2026-05-03', 19.60, 3.95, 12.90, 'MAÑANA'),
+(1, 4, '2026-04-15', 17.30, 3.70, 12.20, 'MAÑANA'),
+(2, 4, '2026-04-15', 19.00, 3.85, 12.70, 'MAÑANA');
+ 
+INSERT INTO VENTA_LECHE (id_lote, id_cliente, fecha, litros_vendidos, precio_por_litro, total_venta) VALUES
+(5, 1, '2026-05-05', 150.00, 3.50, 525.00),
+(5, 2, '2026-05-06', 100.00, 3.60, 360.00),
+(4, 3, '2026-04-20', 200.00, 3.40, 680.00),
+(4, 1, '2026-04-22', 120.00, 3.50, 420.00);
