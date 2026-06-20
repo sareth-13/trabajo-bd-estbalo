@@ -130,3 +130,50 @@ CREATE TABLE VENTA_LECHE (
     CONSTRAINT fk_venta_cliente
         FOREIGN KEY (id_cliente) REFERENCES CLIENTE(id_cliente)
 );
+CREATE TABLE PROVEEDOR (
+    id_proveedor INT PRIMARY KEY AUTO_INCREMENT,
+    nombre       VARCHAR(150) NOT NULL,
+    ruc          VARCHAR(20) UNIQUE,
+    telefono     VARCHAR(20),
+    direccion    VARCHAR(255)
+);
+ 
+CREATE TABLE INSUMO (
+    id_insumo       INT PRIMARY KEY AUTO_INCREMENT,
+    nombre          VARCHAR(100) NOT NULL,
+    unidad_medida   VARCHAR(20),
+    stock_actual    DECIMAL(10,2) DEFAULT 0.00,
+    stock_minimo    DECIMAL(10,2) DEFAULT 0.00,
+    precio_unitario DECIMAL(10,2)
+);
+ 
+CREATE TABLE COMPRA_INSUMO (
+    id_compra      INT PRIMARY KEY AUTO_INCREMENT,
+    id_insumo      INT,
+    id_proveedor   INT,
+    fecha_compra   DATE NOT NULL,
+    cantidad       DECIMAL(10,2) NOT NULL,
+    costo_total    DECIMAL(10,2) NOT NULL,
+    factura_numero VARCHAR(50),
+    CONSTRAINT fk_compra_insumo
+        FOREIGN KEY (id_insumo) REFERENCES INSUMO(id_insumo),
+    CONSTRAINT fk_compra_proveedor
+        FOREIGN KEY (id_proveedor) REFERENCES PROVEEDOR(id_proveedor)
+);
+ 
+CREATE TABLE EVENTO_SANITARIO (
+    id_evento      INT PRIMARY KEY AUTO_INCREMENT,
+    id_vaca        INT,
+    id_veterinario INT,
+    id_insumo      INT,
+    costo          DECIMAL(10,2),
+    tipo_evento    VARCHAR(100),
+    descripcion    TEXT,
+    fecha          DATE NOT NULL,
+    CONSTRAINT fk_evento_vaca
+        FOREIGN KEY (id_vaca) REFERENCES VACA(id_vaca),
+    CONSTRAINT fk_evento_veterinario
+        FOREIGN KEY (id_veterinario) REFERENCES EMPLEADO(id_empleado),
+    CONSTRAINT fk_evento_insumo
+        FOREIGN KEY (id_insumo) REFERENCES INSUMO(id_insumo)
+);
