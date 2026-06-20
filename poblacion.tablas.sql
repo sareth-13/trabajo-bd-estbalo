@@ -109,3 +109,17 @@ INSERT INTO VENTA_LECHE (id_lote, id_cliente, fecha, litros_vendidos, precio_por
 (5, 2, '2026-05-06', 100.00, 3.60, 360.00),
 (4, 3, '2026-04-20', 200.00, 3.40, 680.00),
 (4, 1, '2026-04-22', 120.00, 3.50, 420.00);
+INSERT INTO COMPRA_INSUMO (id_insumo, id_proveedor, fecha_compra, cantidad, costo_total, factura_numero) VALUES
+(1, 1, '2026-05-01', 20.00, 500.00, 'F001-2026'),
+(2, 2, '2026-05-03', 10.00, 400.00, 'F002-2026'),
+(3, 3, '2026-05-05', 30.00, 450.00, 'F003-2026'),
+(4, 1, '2026-05-07', 25.00, 300.00, 'F004-2026'),
+(5, 4, '2026-05-10', 100.00, 300.00, 'F005-2026');
+ 
+INSERT INTO EVENTO_SANITARIO (id_vaca, id_veterinario, id_insumo, costo, tipo_evento, descripcion, fecha) VALUES
+(1, 6, 4, 80.00, 'Vacunación', 'Vacuna contra fiebre aftosa', '2026-05-12'),
+(2, 6, 3, 45.00, 'Desparasitación', 'Aplicación de desparasitante oral', '2026-05-12'),
+(3, 6, 2, 120.00, 'Control prenatal', 'Suplemento vitamínico por gestación', '2026-05-14'),
+(4, 6, 1, 90.00, 'Tratamiento', 'Antibiótico por mastitis leve', '2026-05-15');
+ 
+SET FOREIGN_KEY_CHECKS = 1;
