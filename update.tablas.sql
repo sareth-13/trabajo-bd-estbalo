@@ -2,26 +2,26 @@ USE establo;
 
 SET FOREIGN_KEY_CHECKS = 0;
 
+-- 1. REGISTRO DE ROLES
 INSERT INTO ROL (id_rol, nombre_rol) VALUES 
 (1, 'Administrador'), (2, 'Supervisor'), (3, 'Cajero'), (4, 'Vendedor'), (5, 'Almacenero')
 ON DUPLICATE KEY UPDATE nombre_rol = nombre_rol;
 
--- Solución al error de EMPLEADO usando asignación limpia
-INSERT INTO EMPLEADO (id_empleado, nombre, apellido, cargo, fcha_contrato, salario_base, nmero_tlfono, activo) VALUES
-(1, 'Juan',   'Pérez',     'Administrador', '2023-01-15', 2500.00, '987654321', 1),
-(2, 'María',  'Gómez',     'Cajera',        '2023-03-10', 1800.00, '986123456', 1),
-(3, 'Carlos', 'Ramírez',   'Supervisor',    '2022-11-05', 3200.00, '985741236', 1),
-(4, 'Ana',    'Torres',    'Vendedora',     '2024-02-20', 1700.00, '984852963', 1),
-(5, 'Luis',   'Fernández', 'Almacenero',    '2023-07-12', 1600.00, '983369258', 0)
+-- 2. REGISTRO DE EMPLEADOS (Corregido sin columnas conflictivas)
+INSERT INTO EMPLEADO (id_empleado, nombre, apellido, cargo, salario_base, activo) VALUES
+(1, 'Juan',   'Pérez',     'Administrador', 2500.00, 1),
+(2, 'María',  'Gómez',     'Cajera',        1800.00, 1),
+(3, 'Carlos', 'Ramírez',   'Supervisor',    3200.00, 1),
+(4, 'Ana',    'Torres',    'Vendedora',     1700.00, 1),
+(5, 'Luis',   'Fernández', 'Almacenero',    1600.00, 0)
 AS new_data ON DUPLICATE KEY UPDATE 
     nombre = new_data.nombre, 
     apellido = new_data.apellido, 
     cargo = new_data.cargo, 
-    fcha_contrato = new_data.fcha_contrato,
     salario_base = new_data.salario_base, 
-    nmero_tlfono = new_data.nmero_tlfono,
     activo = new_data.activo;
 
+-- 3. REGISTRO DE CORRALES
 INSERT INTO CORRAL (id_corral, nombre, capacidad, descripcion) VALUES
 (1, 'Corral A', 20, 'Vacas en producción'),
 (2, 'Corral B', 15, 'Vacas secas'),
@@ -33,6 +33,7 @@ AS new_corral ON DUPLICATE KEY UPDATE
     capacidad = new_corral.capacidad, 
     descripcion = new_corral.descripcion;
 
+-- 4. REGISTRO DE VACAS
 INSERT INTO VACA (id_vaca, arete, fecha_nacimiento, estado, fecha_ingreso, id_madre) VALUES
 (1, 'A001', '2020-03-10', 'Activa', '2021-01-05', NULL),
 (2, 'A002', '2019-07-22', 'Activa', '2020-02-10', NULL),
@@ -46,6 +47,7 @@ AS new_vaca ON DUPLICATE KEY UPDATE
     fecha_ingreso = new_vaca.fecha_ingreso,
     id_madre = new_vaca.id_madre;
 
+-- 5. REGISTRO DE LOTES DE PRODUCCIÓN
 INSERT INTO LOTE_PRODUCCION (id_lote, nombre_lote, fecha_inicio, fecha_fin) VALUES
 (1, 'Lote Enero 2026', '2026-01-01', '2026-01-31'),
 (2, 'Lote Febrero 2026', '2026-02-01', '2026-02-28'),
@@ -57,6 +59,7 @@ AS new_lote ON DUPLICATE KEY UPDATE
     fecha_inicio = new_lote.fecha_inicio, 
     fecha_fin = new_lote.fecha_fin;
 
+-- 6. REGISTRO DE INSUMOS
 INSERT INTO INSUMO (id_insumo, nombre, unidad_medida, stock_actual, stock_minimo, precio_unitario) VALUES
 (1, 'Antibiótico', 'frasco', 50, 10, 25.00),
 (2, 'Vitamina ADE', 'litro', 30, 5, 40.00),
@@ -70,6 +73,7 @@ AS new_insumo ON DUPLICATE KEY UPDATE
     stock_minimo = new_insumo.stock_minimo,
     precio_unitario = new_insumo.precio_unitario;
 
+-- 7. REGISTRO DE PROVEEDORES
 INSERT INTO PROVEEDOR (id_proveedor, nombre, ruc, telefono, direccion) VALUES
 (1, 'Distribuidora Andina', '20123456789', '987654321', 'Av. Perú 123'),
 (2, 'Comercial Lima SAC', '20456789123', '986123456', 'Jr. Arequipa 456'),
@@ -82,6 +86,7 @@ AS new_prov ON DUPLICATE KEY UPDATE
     telefono = new_prov.telefono, 
     direccion = new_prov.direccion;
 
+-- 8. REGISTRO DE CLIENTES
 INSERT INTO CLIENTE (id_cliente, nombre, ruc, telefono, direccion) VALUES
 (1, 'Lácteos del Sur SAC', '20111222333', '987111222', 'Av. Industrial 100'),
 (2, 'Quesos Andinos EIRL', '20222333444', '986222333', 'Jr. Comercio 200'),
