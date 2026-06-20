@@ -7,7 +7,7 @@ INSERT INTO ROL (id_rol, nombre_rol) VALUES
 (1, 'Administrador'), (2, 'Supervisor'), (3, 'Cajero'), (4, 'Vendedor'), (5, 'Almacenero')
 ON DUPLICATE KEY UPDATE nombre_rol = VALUES(nombre_rol);
 
--- 2. REGISTRO DE EMPLEADOS (Sintaxis universal limpia)
+-- 2. REGISTRO DE EMPLEADOS (Sintaxis universal limpia sin 'AS')
 INSERT INTO EMPLEADO (id_empleado, nombre, apellido, cargo, salario_base, activo) VALUES
 (1, 'Juan',   'Pérez',     'Administrador', 2500.00, 1),
 (2, 'María',  'Gómez',     'Cajera',        1800.00, 1),
