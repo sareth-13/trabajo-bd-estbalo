@@ -38,8 +38,6 @@ JOIN PROVEEDOR pr ON pr.id_proveedor = c.id_proveedor
 GROUP BY pr.id_proveedor, pr.nombre
 HAVING SUM(c.costo_total) > 500
 ORDER BY gasto_total DESC;
- 
- 
 
 SELECT
     tipo_evento,
@@ -50,3 +48,30 @@ FROM EVENTO_SANITARIO
 GROUP BY tipo_evento
 HAVING SUM(costo) > 200
 ORDER BY costo_total DESC;
+
+SELECT
+    e.id_empleado,
+    CONCAT(e.nombre, ' ', e.apellido)   AS empleado,
+    DATE_FORMAT(a.fecha, '%Y-%m')       AS mes,
+    SUM(CASE WHEN a.presente = FALSE THEN 1 ELSE 0 END) AS faltas,
+    SUM(CASE WHEN a.presente = TRUE  THEN 1 ELSE 0 END) AS dias_presentes
+FROM ASISTENCIA a
+JOIN EMPLEADO e ON e.id_empleado = a.id_empleado
+GROUP BY e.id_empleado, empleado, DATE_FORMAT(a.fecha, '%Y-%m')
+HAVING SUM(CASE WHEN a.presente = FALSE THEN 1 ELSE 0 END) > 2
+ORDER BY mes DESC, faltas DESC;
+
+SELECT
+    co.id_corral,
+    co.nombre                  AS corral,
+    COUNT(DISTINCT v.id_vaca)  AS num_vacas,
+    ROUND(AVG(p.litros), 2)    AS promedio_litros_por_ordeño
+FROM HISTORIAL_CORRAL hc
+JOIN CORRAL co ON co.id_corral = hc.id_corral
+JOIN VACA v ON v.id_vaca = hc.id_vaca
+JOIN PRODUCCION_LECHE p
+     ON p.id_vaca = v.id_vaca
+    AND p.fecha BETWEEN hc.fecha_entrada AND IFNULL(hc.fecha_salida, CURDATE())
+GROUP BY co.id_corral, co.nombre
+HAVING AVG(p.litros) > 15
+ORDER BY promedio_litros_por_ordeño DESC;
