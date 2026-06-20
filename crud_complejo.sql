@@ -139,3 +139,64 @@ BEGIN
        AND fecha_salida IS NULL;
 END $$
 
+DROP PROCEDURE IF EXISTS sp_procesar_pago_empleado $$
+CREATE PROCEDURE sp_procesar_pago_empleado (
+    IN p_id_empleado INT,
+    IN p_mes         VARCHAR(20),   -- ej: '2026-06'
+    IN p_fecha_pago  DATE,
+    IN p_bonos       DECIMAL(10,2)
+)
+BEGIN
+    DECLARE v_salario_base    DECIMAL(10,2);
+    DECLARE v_dias_trabajados INT;
+    DECLARE v_monto_total     DECIMAL(10,2);
+ 
+    SELECT salario_base INTO v_salario_base
+    FROM EMPLEADO WHERE id_empleado = p_id_empleado;
+ 
+    SELECT COUNT(*) INTO v_dias_trabajados
+    FROM ASISTENCIA
+    WHERE id_empleado = p_id_empleado
+      AND presente = TRUE
+      AND DATE_FORMAT(fecha, '%Y-%m') = p_mes;
+ 
+    SET v_monto_total = ROUND((v_salario_base / 30) * v_dias_trabajados + p_bonos, 2);
+ 
+    INSERT INTO PAGO_EMPLEADO (id_empleado, mes, monto_total, fecha_pago, dias_trabajados, bonos)
+    VALUES (p_id_empleado, p_mes, v_monto_total, p_fecha_pago, v_dias_trabajados, p_bonos);
+ 
+    SELECT v_dias_trabajados AS dias_trabajados, v_monto_total AS monto_total;
+END $$
+
+DROP PROCEDURE IF EXISTS sp_registrar_venta_leche $$
+CREATE PROCEDURE sp_registrar_venta_leche (
+    IN p_id_lote          INT,
+    IN p_id_cliente       INT,
+    IN p_fecha            DATE,
+    IN p_litros_vendidos  DECIMAL(8,2),
+    IN p_precio_por_litro DECIMAL(6,2)
+)
+BEGIN
+    DECLARE v_litros_producidos DECIMAL(10,2);
+    DECLARE v_litros_ya_vendidos DECIMAL(10,2);
+    DECLARE v_litros_disponibles DECIMAL(10,2);
+ 
+    SELECT IFNULL(SUM(litros), 0) INTO v_litros_producidos
+    FROM PRODUCCION_LECHE WHERE id_lote = p_id_lote;
+ 
+    SELECT IFNULL(SUM(litros_vendidos), 0) INTO v_litros_ya_vendidos
+    FROM VENTA_LECHE WHERE id_lote = p_id_lote;
+ 
+    SET v_litros_disponibles = v_litros_producidos - v_litros_ya_vendidos;
+ 
+    IF p_litros_vendidos > v_litros_disponibles THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'No hay suficiente leche disponible en ese lote.';
+    END IF;
+ 
+    INSERT INTO VENTA_LECHE (id_lote, id_cliente, fecha, litros_vendidos, precio_por_litro, total_venta)
+    VALUES (p_id_lote, p_id_cliente, p_fecha, p_litros_vendidos, p_precio_por_litro,
+            ROUND(p_litros_vendidos * p_precio_por_litro, 2));
+END $$
+ 
+DELIMITER ;
