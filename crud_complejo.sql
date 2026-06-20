@@ -82,3 +82,60 @@ BEGIN
            precio_unitario = ROUND(p_costo_total / p_cantidad, 2)
      WHERE id_insumo = p_id_insumo;
 END $$
+
+DROP PROCEDURE IF EXISTS sp_registrar_evento_sanitario $$
+CREATE PROCEDURE sp_registrar_evento_sanitario (
+    IN p_id_vaca        INT,
+    IN p_id_veterinario INT,
+    IN p_id_insumo      INT,
+    IN p_cantidad_usada DECIMAL(10,2),
+    IN p_costo          DECIMAL(10,2),
+    IN p_tipo_evento    VARCHAR(100),
+    IN p_descripcion    TEXT,
+    IN p_fecha          DATE
+)
+BEGIN
+    DECLARE v_stock_disponible DECIMAL(10,2);
+ 
+    SELECT stock_actual INTO v_stock_disponible
+    FROM INSUMO WHERE id_insumo = p_id_insumo
+    FOR UPDATE;
+ 
+    IF v_stock_disponible < p_cantidad_usada THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Stock insuficiente del insumo para este evento sanitario.';
+    END IF;
+ 
+    INSERT INTO EVENTO_SANITARIO (id_vaca, id_veterinario, id_insumo, costo, tipo_evento, descripcion, fecha)
+    VALUES (p_id_vaca, p_id_veterinario, p_id_insumo, p_costo, p_tipo_evento, p_descripcion, p_fecha);
+ 
+    UPDATE INSUMO
+       SET stock_actual = stock_actual - p_cantidad_usada
+     WHERE id_insumo = p_id_insumo;
+END $$
+ 
+ 
+DROP PROCEDURE IF EXISTS sp_dar_baja_vaca $$
+CREATE PROCEDURE sp_dar_baja_vaca (
+    IN p_id_vaca      INT,
+    IN p_nuevo_estado VARCHAR(50),  -- 'VENDIDA' o 'MUERTA'
+    IN p_fecha_baja   DATE
+)
+BEGIN
+    IF p_nuevo_estado NOT IN ('VENDIDA','MUERTA') THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Estado de baja inválido. Use VENDIDA o MUERTA.';
+    END IF;
+ 
+    UPDATE VACA
+       SET estado = p_nuevo_estado,
+           fecha_venta_muerte = p_fecha_baja
+     WHERE id_vaca = p_id_vaca;
+ 
+    UPDATE HISTORIAL_CORRAL
+       SET fecha_salida = p_fecha_baja,
+           motivo = CONCAT('Baja de la vaca: ', p_nuevo_estado)
+     WHERE id_vaca = p_id_vaca
+       AND fecha_salida IS NULL;
+END $$
+
