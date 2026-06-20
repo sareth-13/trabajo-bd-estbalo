@@ -86,3 +86,47 @@ CREATE TABLE HISTORIAL_CORRAL (
     CONSTRAINT fk_historial_corral
         FOREIGN KEY (id_corral) REFERENCES CORRAL(id_corral)
 );
+
+CREATE TABLE LOTE_PRODUCCION (
+    id_lote      INT PRIMARY KEY AUTO_INCREMENT,
+    nombre_lote  VARCHAR(100),
+    fecha_inicio DATE,
+    fecha_fin    DATE
+);
+ 
+CREATE TABLE PRODUCCION_LECHE (
+    id_produccion              INT PRIMARY KEY AUTO_INCREMENT,
+    id_vaca                    INT,
+    id_lote                    INT,
+    fecha                      DATE,
+    litros                     DECIMAL(5,2),
+    grasa_porcentaje           DECIMAL(5,2),
+    solidos_totales_porcentaje DECIMAL(5,2),
+    turno                      ENUM('MAÑANA','TARDE','NOCHE'),
+    CONSTRAINT fk_produccion_vaca
+        FOREIGN KEY (id_vaca) REFERENCES VACA(id_vaca),
+    CONSTRAINT fk_produccion_lote
+        FOREIGN KEY (id_lote) REFERENCES LOTE_PRODUCCION(id_lote)
+);
+ 
+CREATE TABLE CLIENTE (
+    id_cliente INT PRIMARY KEY AUTO_INCREMENT,
+    nombre     VARCHAR(150) NOT NULL,
+    ruc        VARCHAR(20) UNIQUE,
+    telefono   VARCHAR(20),
+    direccion  VARCHAR(255)
+);
+ 
+CREATE TABLE VENTA_LECHE (
+    id_venta         INT PRIMARY KEY AUTO_INCREMENT,
+    id_lote          INT,
+    id_cliente       INT,
+    fecha            DATE,
+    litros_vendidos  DECIMAL(8,2),
+    precio_por_litro DECIMAL(6,2),
+    total_venta      DECIMAL(10,2),
+    CONSTRAINT fk_venta_lote
+        FOREIGN KEY (id_lote) REFERENCES LOTE_PRODUCCION(id_lote),
+    CONSTRAINT fk_venta_cliente
+        FOREIGN KEY (id_cliente) REFERENCES CLIENTE(id_cliente)
+);
