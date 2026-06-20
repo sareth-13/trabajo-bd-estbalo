@@ -37,8 +37,6 @@ DECLARE EXIT HANDLER FOR SQLEXCEPTION
         LEAVE proc;
     END IF;
  
-    -- Bloquea las filas de producción de ese lote para evitar condiciones
-    -- de carrera si dos ventas se procesan al mismo tiempo
     SELECT IFNULL(SUM(litros), 0) INTO v_litros_producidos
     FROM PRODUCCION_LECHE WHERE id_lote = p_id_lote
     FOR UPDATE;
@@ -65,3 +63,61 @@ DECLARE EXIT HANDLER FOR SQLEXCEPTION
     COMMIT;
     SET p_mensaje = 'OK: venta registrada correctamente.';
 END $$
+
+DROP PROCEDURE IF EXISTS sp_tx_trasladar_vaca $$
+CREATE PROCEDURE sp_tx_trasladar_vaca (
+    IN  p_id_vaca         INT,
+    IN  p_id_corral_nuevo INT,
+    IN  p_motivo          VARCHAR(225),
+    OUT p_mensaje         VARCHAR(255)
+)
+proc: BEGIN
+    DECLARE v_capacidad     INT;
+    DECLARE v_ocupacion     INT;
+ 
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SET p_mensaje = 'ERROR: la transacción fue revertida (ROLLBACK).';
+    END;
+ 
+    START TRANSACTION;
+ 
+    SELECT capacidad INTO v_capacidad
+    FROM CORRAL WHERE id_corral = p_id_corral_nuevo
+    FOR UPDATE;
+ 
+    IF v_capacidad IS NULL THEN
+        ROLLBACK;
+        SET p_mensaje = 'ERROR: el corral destino no existe.';
+        LEAVE proc;
+    END IF;
+ 
+    SELECT COUNT(*) INTO v_ocupacion
+    FROM HISTORIAL_CORRAL
+    WHERE id_corral = p_id_corral_nuevo
+      AND fecha_salida IS NULL;
+ 
+    IF v_ocupacion >= v_capacidad THEN
+        ROLLBACK;
+        SET p_mensaje = 'ERROR: el corral destino está al máximo de su capacidad.';
+        LEAVE proc;
+    END IF;
+ 
+    UPDATE HISTORIAL_CORRAL
+       SET fecha_salida = CURDATE()
+     WHERE id_vaca = p_id_vaca
+       AND fecha_salida IS NULL;
+ 
+    INSERT INTO HISTORIAL_CORRAL (id_vaca, id_corral, fecha_entrada, motivo)
+    VALUES (p_id_vaca, p_id_corral_nuevo, CURDATE(), p_motivo);
+ 
+    UPDATE VACA
+       SET estado = 'ACTIVA'
+     WHERE id_vaca = p_id_vaca;
+ 
+    COMMIT;
+    SET p_mensaje = 'OK: traslado realizado correctamente.';
+END $$
+ 
+DELIMITER ;
