@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS HISTORIAL_CLINICO (
     id_vaca        INT NOT NULL,
     fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
     tipo           VARCHAR(50) NOT NULL,
-    datos_clinicos JSON NOT NULL,  -- datos semi-estructurados
+    datos_clinicos JSON NOT NULL,  
     CONSTRAINT fk_historial_clinico_vaca
         FOREIGN KEY (id_vaca) REFERENCES VACA(id_vaca)
         ON DELETE CASCADE ON UPDATE CASCADE
