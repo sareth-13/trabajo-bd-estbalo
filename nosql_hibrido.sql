@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS HISTORIAL_CLINICO (
     datos_clinicos JSON NOT NULL,  
     CONSTRAINT fk_historial_clinico_vaca
         FOREIGN KEY (id_vaca) REFERENCES VACA(id_vaca)
-        ON DELETE CASCADE ON UPDATE CASCADE
+        ON DELETE CASCADE ON UPDATE CASCADE --hola
 );
 INSERT INTO HISTORIAL_CLINICO (id_vaca, tipo, datos_clinicos) 
 VALUES 
