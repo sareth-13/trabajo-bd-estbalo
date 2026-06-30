@@ -122,7 +122,7 @@ CREATE PROCEDURE sp_dar_baja_vaca (
     IN p_fecha_baja   DATE
 )
 BEGIN
-    IF p_nuevo_estado NOT IN ('VENDIDA','MUERTA') THEN
+    IF p_nuevo_estado NOT IN ('Vendida','Muerta') THEN
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'Estado de baja inválido. Use VENDIDA o MUERTA.';
     END IF;
@@ -142,7 +142,7 @@ END $$
 DROP PROCEDURE IF EXISTS sp_procesar_pago_empleado $$
 CREATE PROCEDURE sp_procesar_pago_empleado (
     IN p_id_empleado INT,
-    IN p_mes         VARCHAR(20),   -- ej: '2026-06'
+    IN p_mes         VARCHAR(20),   
     IN p_fecha_pago  DATE,
     IN p_bonos       DECIMAL(10,2)
 )
