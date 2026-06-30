@@ -2,6 +2,9 @@ USE establo;
 
 
 
+ALTER TABLE EVENTO_SANITARIO
+    ADD COLUMN IF NOT EXISTS metadatos JSON NULL
+    COMMENT 'Datos variables según tipo_evento';
 
 
 CREATE TABLE IF NOT EXISTS HISTORIAL_CLINICO (
