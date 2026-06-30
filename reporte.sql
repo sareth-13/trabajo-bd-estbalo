@@ -40,13 +40,16 @@ HAVING SUM(c.costo_total) > 500
 ORDER BY gasto_total DESC;
 
 SELECT
-    tipo_evento,
-    COUNT(id_evento)      AS num_eventos,
-    SUM(costo)             AS costo_total,
+    es.tipo_evento,
+    v.arete,
+    COUNT(es.id_evento)    AS num_eventos,
+    SUM(es.costo)          AS costo_total,
     ROUND(AVG(costo), 2)   AS costo_promedio
-FROM EVENTO_SANITARIO
-GROUP BY tipo_evento
-HAVING SUM(costo) > 200
+FROM EVENTO_SANITARIO es
+JOIN VACA v ON v.id_vaca = es.id_vaca
+JOIN INSUMO i ON i.id_insumo = es.id_insumo
+GROUP BY es.tipo_evento, v.arete
+HAVING SUM(es.costo) > 200
 ORDER BY costo_total DESC;
 
 SELECT
