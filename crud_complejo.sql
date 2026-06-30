@@ -50,7 +50,7 @@ BEGIN
     VALUES (p_id_vaca, p_id_corral_nuevo, CURDATE(), p_motivo);
  
     UPDATE VACA
-       SET estado = 'ACTIVA'
+       SET estado = 'Activa'
      WHERE id_vaca = p_id_vaca;
 END $$
 
